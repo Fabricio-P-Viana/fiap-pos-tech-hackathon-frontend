@@ -1,0 +1,249 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f3f3f3;
+  --surface: #fafafa;
+  --foreground: #171717;
+  --line: #d0d0d0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-space-grotesk), sans-serif;
+}
+
+a {
+  color: inherit;
+}
+
+::selection {
+  background: #1f1f1f;
+  color: #ffffff;
+}
+
+:focus-visible {
+  outline: 3px solid #1f1f1f;
+  outline-offset: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  left: 0.75rem;
+  top: -3rem;
+  z-index: 1000;
+  padding: 0.625rem 0.875rem;
+  border-radius: 8px;
+  background: #111;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.skip-link:focus {
+  top: 0.75rem;
+}
+
+.site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 800;
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(10px);
+  background: rgb(250 250 250 / 88%);
+  overflow: visible;
+}
+
+.page-shell {
+  min-height: 100vh;
+  padding-top: 5.25rem;
+}
+
+.brand-mark {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #171717;
+}
+
+.header-link {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: #171717;
+  transition: background-color 180ms ease;
+}
+
+.header-link:hover {
+  background: #ececec;
+}
+
+.header-link-button {
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.status-page-card {
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.status-page-code {
+  width: fit-content;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+  background: #f2f2f2;
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.status-page-title {
+  font-size: clamp(1.8rem, 4.4vw, 2.6rem);
+  line-height: 1.06;
+  letter-spacing: -0.02em;
+}
+
+.status-page-description {
+  max-width: 56ch;
+  line-height: 1.65;
+}
+
+.status-page-digest {
+  width: fit-content;
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+  padding: 0.45rem 0.6rem;
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 0.75rem;
+  color: #4f4f4f;
+}
+
+.status-page-link {
+  width: fit-content;
+  color: #171717;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.status-page-link:hover {
+  text-decoration-thickness: 2px;
+}
+
+.auth-page-title {
+  max-width: 17ch;
+  font-size: clamp(2rem, 4.4vw, 3.05rem);
+  line-height: 1.03;
+  letter-spacing: -0.02em;
+}
+
+.auth-page-card {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.auth-panel {
+  height: 100%;
+  border: 1px dashed var(--line);
+  border-radius: 14px;
+  padding: clamp(0.85rem, 1vw + 0.65rem, 1.2rem);
+  background: var(--surface);
+  animation: card-enter 450ms ease-out both;
+}
+
+.auth-panel-register {
+  animation-delay: 90ms;
+}
+
+.auth-page-card .mantine-InputWrapper-label {
+  font-weight: 600;
+}
+
+.auth-page-card .mantine-Input-input {
+  border-color: var(--line);
+  background: #ffffff;
+}
+
+.auth-page-card .mantine-Input-input:focus,
+.auth-page-card .mantine-Input-input:focus-within {
+  border-color: #171717;
+}
+
+.auth-page-card .mantine-Checkbox-label {
+  font-size: 0.92rem;
+}
+
+.card-link {
+  width: fit-content;
+  color: #171717;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.card-link:hover {
+  text-decoration-thickness: 2px;
+}
+
+.site-footer {
+  margin-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.footer-link {
+  color: #171717;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.footer-link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 48rem) {
+  .page-shell {
+    padding-top: 4.75rem;
+  }
+}
+
+@keyframes card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
