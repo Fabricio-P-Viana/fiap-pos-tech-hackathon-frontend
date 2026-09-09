@@ -1,6 +1,6 @@
 # Resolve Aí - Frontend
 
-Frontend do Resolve Aí, plataforma de gestão de ocorrências, desenvolvido com Next.js, React e Mantine.
+Frontend do Resolve Aí, plataforma de gestão de ocorrências, desenvolvido com Next.js, React e Mantine
 
 Neste momento o projeto mantém a base de autenticação e cadastro integrada ao backend. As telas de ocorrências serão desenvolvidas sobre essa base.
 
@@ -28,12 +28,12 @@ A aplicação estará disponível em `http://localhost:3000`.
 
 ## Variáveis de ambiente
 
-| Variável | Descrição |
-| --- | --- |
-| `AUTH_API_BASE_URL` | URL base do backend usado pelos proxies de autenticação |
-| `NEXT_PUBLIC_API_BASE_URL` | URL pública base da API, usada como fallback |
-| `NEXTAUTH_URL` | URL da aplicação NextAuth |
-| `NEXTAUTH_SECRET` | Segredo usado para assinar a sessão JWT |
+| Variável                   | Descrição                                               |
+| -------------------------- | ------------------------------------------------------- |
+| `AUTH_API_BASE_URL`        | URL base do backend usado pelos proxies de autenticação |
+| `NEXT_PUBLIC_API_BASE_URL` | URL pública base da API, usada como fallback            |
+| `NEXTAUTH_URL`             | URL da aplicação NextAuth                               |
+| `NEXTAUTH_SECRET`          | Segredo usado para assinar a sessão JWT                 |
 
 ## Integração de autenticação
 
