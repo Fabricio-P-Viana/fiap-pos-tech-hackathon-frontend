@@ -48,6 +48,7 @@ import type {
 } from "@/types/resolve-ai";
 import { priorityLabels, statusLabels } from "@/types/resolve-ai";
 import { CategoryPanel } from "./category-panel";
+import { DashboardPanel } from "./dashboard-panel";
 
 const statusOptions: { value: OccurrenceStatus; label: string }[] = [
   { value: "IN_ANALYSIS", label: "Em análise" },
@@ -320,6 +321,7 @@ export function ManagementWorkspace() {
                 </Badge>
               </Tabs.Tab>
               <Tabs.Tab value="categories">Categorias</Tabs.Tab>
+              <Tabs.Tab value="dashboard">Dashboard</Tabs.Tab>
             </Tabs.List>
             <Tabs.Panel value="requests" pt="xl">
               <Stack gap="md">
@@ -469,6 +471,9 @@ export function ManagementWorkspace() {
                 onError={setError}
                 onNotice={setNotice}
               />
+            </Tabs.Panel>
+            <Tabs.Panel value="dashboard" pt="xl">
+              <DashboardPanel token={token} onError={setError} />
             </Tabs.Panel>
             <Tabs.Panel value="users" pt="xl">
               <Stack gap="md">

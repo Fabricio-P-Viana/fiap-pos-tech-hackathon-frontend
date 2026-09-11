@@ -16,6 +16,8 @@ import {
   Title,
 } from "@mantine/core";
 import { IconAlertCircle, IconSend } from "@tabler/icons-react";
+import { IconArrowRight } from "@tabler/icons-react";
+import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -264,6 +266,16 @@ export function RequestWorkspace() {
                         <Text size="xs" c="dimmed">
                           #{occurrence.id}
                         </Text>
+                        <Button
+                          component={Link}
+                          href={`/solicitacoes/${occurrence.id}`}
+                          size="xs"
+                          variant="subtle"
+                          color="dark"
+                          rightSection={<IconArrowRight size={14} />}
+                        >
+                          Ver detalhes
+                        </Button>
                       </Group>
                     </Stack>
                   </Card>

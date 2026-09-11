@@ -35,7 +35,7 @@ export function HomeFooter() {
 
           <Group justify="space-between" align="center">
             <Text size="xs" c="gray-filled-hover">
-              Projeto academico FIAP Pos Tech Fase 3 - 2026
+              Projeto academico FIAP Pos Tech Fase 5 - 2026
             </Text>
             <Text size="xs" c="gray-filled-hover">
               Desenvolvido por{" "}

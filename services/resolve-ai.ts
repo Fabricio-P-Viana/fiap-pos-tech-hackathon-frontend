@@ -8,6 +8,9 @@ import type {
   CommentRecord,
   OccurrenceEventRecord,
   RatingRecord,
+  PaginatedResponse,
+  OccurrenceFilterParams,
+  DashboardIndicators,
 } from "@/types/resolve-ai";
 
 export function getUsers(token?: string) {
@@ -73,8 +76,54 @@ export function deleteCategory(token: string | undefined, id: number) {
   return apiRequest<void>(`/categories/${id}`, token, { method: "DELETE" });
 }
 
-export function getOccurrences(token?: string) {
-  return apiRequest<OccurrenceRecord[]>("/occurrences", token);
+function buildQueryString(
+  params?: Record<string, string | number | undefined>,
+): string {
+  if (!params) return "";
+  const search = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== null && value !== "") {
+      search.set(key, String(value));
+    }
+  }
+  const query = search.toString();
+  return query ? `?${query}` : "";
+}
+
+export async function getOccurrences(
+  token?: string,
+  filters?: OccurrenceFilterParams,
+): Promise<OccurrenceRecord[]> {
+  const result = await getOccurrencesPaginated(token, {
+    limit: 100,
+    ...filters,
+  });
+  return result.data;
+}
+
+export function getOccurrencesPaginated(
+  token: string | undefined,
+  filters?: OccurrenceFilterParams,
+) {
+  return apiRequest<PaginatedResponse<OccurrenceRecord>>(
+    `/occurrences${buildQueryString(filters as Record<string, string | number | undefined>)}`,
+    token,
+  );
+}
+
+export function getDashboardIndicators(token?: string) {
+  return apiRequest<DashboardIndicators>("/occurrences/dashboard", token);
+}
+
+export function cancelOccurrence(
+  token: string | undefined,
+  id: number,
+  note?: string,
+) {
+  return apiRequest<OccurrenceRecord>(`/occurrences/${id}/cancel`, token, {
+    method: "PATCH",
+    body: JSON.stringify({ note }),
+  });
 }
 
 export function getOccurrenceEvents(token: string | undefined, id: number) {
@@ -109,6 +158,21 @@ export function createRating(
   return apiRequest<RatingRecord>("/ratings", token, {
     method: "POST",
     body: JSON.stringify(data),
+  });
+}
+
+export function uploadAttachment(
+  token: string | undefined,
+  occurrenceId: number,
+  file: File,
+) {
+  const body = new FormData();
+  body.append("occurrenceId", String(occurrenceId));
+  body.append("file", file);
+  return apiRequest<unknown>("/attachments/upload", token, {
+    method: "POST",
+    body,
+    headers: {},
   });
 }
 

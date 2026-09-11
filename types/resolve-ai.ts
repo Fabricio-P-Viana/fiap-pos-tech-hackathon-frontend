@@ -71,6 +71,39 @@ export type RatingRecord = {
   createdAt?: string;
 };
 
+export type PaginatedResponse<T> = {
+  data: T[];
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+};
+
+export type OccurrenceFilterParams = {
+  status?: OccurrenceStatus;
+  priority?: OccurrencePriority;
+  categoryId?: number;
+  assigneeId?: number;
+  search?: string;
+  createdFrom?: string;
+  createdTo?: string;
+  resolvedFrom?: string;
+  resolvedTo?: string;
+  page?: number;
+  limit?: number;
+};
+
+export type DashboardIndicators = {
+  total: number;
+  byStatus: Record<string, number>;
+  byPriority: Record<string, number>;
+  byCategory: Array<{ categoryId: number; categoryName: string; total: number }>;
+  open: number;
+  inProgress: number;
+  resolved: number;
+  averageResolutionHours: number | null;
+};
+
 export const statusLabels: Record<OccurrenceStatus, string> = {
   OPEN: "Aberta",
   IN_ANALYSIS: "Em análise",
