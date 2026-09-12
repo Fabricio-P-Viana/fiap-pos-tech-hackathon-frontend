@@ -35,7 +35,6 @@ import {
   assignOccurrence,
   createUser,
   deleteUser,
-  deleteOccurrence,
   getOccurrences,
   getUsers,
   updateOccurrence,
@@ -277,22 +276,6 @@ export function ManagementWorkspace() {
     }
   }
 
-  async function removeOccurrence(occurrence: OccurrenceRecord) {
-    if (!token || !window.confirm(`Excluir a solicitação #${occurrence.id}?`))
-      return;
-    try {
-      await deleteOccurrence(token, occurrence.id);
-      setNotice("Solicitação excluída.");
-      await loadData();
-    } catch (deleteError) {
-      setError(
-        deleteError instanceof Error
-          ? deleteError.message
-          : "Não foi possível excluir a solicitação.",
-      );
-    }
-  }
-
   if (sessionStatus === "loading" || loading)
     return (
       <Container size="lg" py={64}>
@@ -431,15 +414,6 @@ export function ManagementWorkspace() {
                               onClick={() => openOccurrenceEdit(occurrence)}
                             >
                               Editar
-                            </Button>
-                            <Button
-                              size="xs"
-                              variant="subtle"
-                              color="red"
-                              leftSection={<IconTrash size={14} />}
-                              onClick={() => void removeOccurrence(occurrence)}
-                            >
-                              Excluir
                             </Button>
                           </Group>
                           {!final && nextStatuses.length > 0 && (

@@ -27,8 +27,11 @@ export type OccurrencePriority = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 export type OccurrenceRecord = {
   id: number;
   requesterId: number;
+  requesterName?: string | null;
   assigneeId?: number | null;
+  assigneeName?: string | null;
   categoryId: number;
+  categoryName?: string | null;
   title: string;
   description: string;
   status: OccurrenceStatus;
@@ -38,6 +41,7 @@ export type OccurrenceRecord = {
   latitude?: number | null;
   longitude?: number | null;
   resolution?: string | null;
+  cancellationReason?: string | null;
   resolvedAt?: string | null;
   createdAt?: string;
   updatedAt?: string;
@@ -60,14 +64,25 @@ export function getNextStatuses(status: OccurrenceStatus): OccurrenceStatus[] {
   return STATUS_TRANSITIONS[status];
 }
 
+export type OccurrenceEventType =
+  | "CREATED"
+  | "STATUS_CHANGED"
+  | "PRIORITY_CHANGED"
+  | "ASSIGNEE_CHANGED";
+
 export type OccurrenceEventRecord = {
   id: number;
   occurrenceId: number;
-  type: "CREATED" | "STATUS_CHANGED" | "PRIORITY_CHANGED" | "ASSIGNEE_CHANGED";
+  occurrenceTitle?: string | null;
+  type: OccurrenceEventType;
   previousValue?: string | null;
   newValue?: string | null;
+  /** previousValue/newValue já legíveis (ids de usuário resolvidos em nome). */
+  previousLabel?: string | null;
+  newLabel?: string | null;
   note?: string | null;
   actorId: number;
+  actorName?: string | null;
   createdAt?: string;
 };
 
@@ -75,8 +90,19 @@ export type CommentRecord = {
   id: number;
   occurrenceId: number;
   authorId: number;
+  authorName?: string | null;
   body: string;
   isInternal: boolean;
+  createdAt?: string;
+};
+
+export type AttachmentRecord = {
+  id: number;
+  occurrenceId: number;
+  filePath: string;
+  url?: string | null;
+  mimeType: string;
+  sizeBytes: number;
   createdAt?: string;
 };
 
@@ -97,18 +123,39 @@ export type PaginatedResponse<T> = {
   totalPages: number;
 };
 
+export type OccurrenceSortField =
+  | "createdAt"
+  | "updatedAt"
+  | "priority"
+  | "status";
+
 export type OccurrenceFilterParams = {
   status?: OccurrenceStatus;
   priority?: OccurrencePriority;
   categoryId?: number;
-  assigneeId?: number;
+  /** Id do responsável ou "me" para o usuário autenticado. */
+  assigneeId?: number | "me";
   search?: string;
   createdFrom?: string;
   createdTo?: string;
   resolvedFrom?: string;
   resolvedTo?: string;
+  sortBy?: OccurrenceSortField;
+  sortOrder?: "ASC" | "DESC";
   page?: number;
   limit?: number;
+};
+
+export type RatingIndicators = {
+  count: number;
+  average: number | null;
+  distribution: Record<string, number>;
+  byCategory: Array<{
+    categoryId: number;
+    categoryName: string;
+    count: number;
+    average: number;
+  }>;
 };
 
 export type DashboardIndicators = {
@@ -124,6 +171,7 @@ export type DashboardIndicators = {
   inProgress: number;
   resolved: number;
   averageResolutionHours: number | null;
+  ratings?: RatingIndicators;
 };
 
 export const statusLabels: Record<OccurrenceStatus, string> = {

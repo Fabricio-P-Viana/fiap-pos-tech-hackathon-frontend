@@ -205,10 +205,15 @@ export function RequestDetail({ id }: { id: number }) {
 
   async function handleCancel() {
     if (!token || !occurrence) return;
+    // O motivo é obrigatório: a solicitação fica como histórico.
+    if (!statusNote.trim()) {
+      setError("Informe o motivo do cancelamento na observação.");
+      return;
+    }
     if (!window.confirm("Cancelar esta solicitação?")) return;
     try {
       setSaving(true);
-      await cancelOccurrence(token, occurrence.id, statusNote || undefined);
+      await cancelOccurrence(token, occurrence.id, statusNote.trim());
       setNotice("Solicitação cancelada.");
       await load();
     } catch (cancelError) {

@@ -25,7 +25,11 @@ import {
   getCategories,
   getOccurrences,
 } from "@/services/resolve-ai";
-import type { CategoryRecord, OccurrenceRecord } from "@/types/resolve-ai";
+import type {
+  CategoryRecord,
+  OccurrencePriority,
+  OccurrenceRecord,
+} from "@/types/resolve-ai";
 import { priorityLabels, statusLabels } from "@/types/resolve-ai";
 
 const priorityOptions = Object.entries(priorityLabels).map(
@@ -46,7 +50,7 @@ export function RequestWorkspace() {
     categoryId: "",
     title: "",
     description: "",
-    priority: "MEDIUM",
+    priority: "MEDIUM" as OccurrencePriority,
     locationText: "",
     locationReference: "",
   });
@@ -193,7 +197,10 @@ export function RequestWorkspace() {
                     data={priorityOptions}
                     value={form.priority}
                     onChange={(value) =>
-                      setForm({ ...form, priority: value ?? "MEDIUM" })
+                      setForm({
+                        ...form,
+                        priority: (value ?? "MEDIUM") as OccurrencePriority,
+                      })
                     }
                     required
                   />

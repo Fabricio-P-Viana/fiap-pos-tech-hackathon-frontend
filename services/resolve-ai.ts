@@ -1,7 +1,9 @@
 import { apiRequest } from "./api";
 import type {
+  AttachmentRecord,
   CategoryRecord,
   OccurrenceRecord,
+  OccurrencePriority,
   OccurrenceStatus,
   UserRecord,
   UserRole,
@@ -119,20 +121,35 @@ export function getDashboardIndicators(token?: string) {
   return apiRequest<DashboardIndicators>("/occurrences/dashboard", token);
 }
 
+/** O motivo é obrigatório: a solicitação permanece como histórico. */
 export function cancelOccurrence(
   token: string | undefined,
   id: number,
-  note?: string,
+  cancellationReason: string,
 ) {
   return apiRequest<OccurrenceRecord>(`/occurrences/${id}/cancel`, token, {
     method: "PATCH",
-    body: JSON.stringify({ note }),
+    body: JSON.stringify({ cancellationReason }),
   });
 }
 
 export function getOccurrenceEvents(token: string | undefined, id: number) {
   return apiRequest<OccurrenceEventRecord[]>(
     `/occurrences/${id}/events`,
+    token,
+  );
+}
+
+/** Últimos acontecimentos no escopo do usuário, para o resumo da home. */
+export function getRecentEvents(
+  token: string | undefined,
+  options?: { limit?: number; assignedToMe?: boolean },
+) {
+  return apiRequest<OccurrenceEventRecord[]>(
+    `/occurrences/events/recent${buildQueryString({
+      limit: options?.limit,
+      ...(options?.assignedToMe ? { assignedToMe: "true" } : {}),
+    })}`,
     token,
   );
 }
@@ -162,6 +179,28 @@ export function getRatings(token?: string) {
   return apiRequest<RatingRecord[]>("/ratings", token);
 }
 
+/** Avaliação de uma solicitação (a API já escopa por usuário). */
+export async function getOccurrenceRating(
+  token: string | undefined,
+  occurrenceId: number,
+): Promise<RatingRecord | null> {
+  const ratings = await apiRequest<RatingRecord[]>(
+    `/ratings${buildQueryString({ occurrenceId })}`,
+    token,
+  );
+  return ratings[0] ?? null;
+}
+
+export function getOccurrenceAttachments(
+  token: string | undefined,
+  occurrenceId: number,
+) {
+  return apiRequest<AttachmentRecord[]>(
+    `/attachments${buildQueryString({ occurrenceId })}`,
+    token,
+  );
+}
+
 export function createRating(
   token: string | undefined,
   data: { occurrenceId: number; score: number; comment?: string },
@@ -180,7 +219,7 @@ export function uploadAttachment(
   const body = new FormData();
   body.append("occurrenceId", String(occurrenceId));
   body.append("file", file);
-  return apiRequest<unknown>("/attachments/upload", token, {
+  return apiRequest<AttachmentRecord>("/attachments/upload", token, {
     method: "POST",
     body,
     headers: {},
@@ -193,7 +232,7 @@ export function createOccurrence(
     categoryId: number;
     title: string;
     description: string;
-    priority: string;
+    priority: OccurrencePriority;
     locationText?: string;
     locationReference?: string;
     latitude?: number;
@@ -203,6 +242,18 @@ export function createOccurrence(
   return apiRequest<OccurrenceRecord>("/occurrences", token, {
     method: "POST",
     body: JSON.stringify(data),
+  });
+}
+
+/** Reclassificação de prioridade pelo gestor responsável. */
+export function changeOccurrencePriority(
+  token: string | undefined,
+  id: number,
+  priority: OccurrencePriority,
+) {
+  return apiRequest<OccurrenceRecord>(`/occurrences/${id}`, token, {
+    method: "PUT",
+    body: JSON.stringify({ priority }),
   });
 }
 
@@ -218,6 +269,7 @@ export function changeOccurrenceStatus(
   });
 }
 
+/** Define o responsável — pré-requisito para qualquer mudança de status. */
 export function assignOccurrence(
   token: string | undefined,
   id: number,
@@ -252,6 +304,7 @@ export function updateOccurrence(
   });
 }
 
-export function deleteOccurrence(token: string | undefined, id: number) {
-  return apiRequest<void>(`/occurrences/${id}`, token, { method: "DELETE" });
-}
+/**
+ * Solicitações não são excluídas: elas ficam como histórico e o encerramento
+ * indevido é feito por cancelamento com motivo (cancelOccurrence).
+ */
