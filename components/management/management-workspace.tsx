@@ -23,9 +23,11 @@ import {
   IconAlertCircle,
   IconCheck,
   IconEdit,
+  IconEye,
   IconPlus,
   IconTrash,
 } from "@tabler/icons-react";
+import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -46,16 +48,22 @@ import type {
   UserRecord,
   UserRole,
 } from "@/types/resolve-ai";
-import { priorityLabels, statusLabels } from "@/types/resolve-ai";
+import {
+  getNextStatuses,
+  isFinalStatus,
+  priorityLabels,
+  statusLabels,
+} from "@/types/resolve-ai";
 import { CategoryPanel } from "./category-panel";
 import { DashboardPanel } from "./dashboard-panel";
 
-const statusOptions: { value: OccurrenceStatus; label: string }[] = [
-  { value: "IN_ANALYSIS", label: "Em análise" },
-  { value: "IN_PROGRESS", label: "Em atendimento" },
-  { value: "RESOLVED", label: "Resolvida" },
-  { value: "CANCELLED", label: "Cancelada" },
-];
+const statusLabelsByValue: Record<OccurrenceStatus, string> = {
+  OPEN: "Reabrir",
+  IN_ANALYSIS: "Colocar em análise",
+  IN_PROGRESS: "Iniciar atendimento",
+  RESOLVED: "Marcar como resolvida",
+  CANCELLED: "Cancelar",
+};
 
 export function ManagementWorkspace() {
   const { data: session, status: sessionStatus } = useSession();
@@ -187,13 +195,24 @@ export function ManagementWorkspace() {
     nextStatus: OccurrenceStatus,
   ) {
     if (!token) return;
+    const note = noteByOccurrence[occurrence.id];
     try {
-      await changeOccurrenceStatus(
-        token,
-        occurrence.id,
-        nextStatus,
-        noteByOccurrence[occurrence.id],
-      );
+      if (
+        nextStatus === "RESOLVED" &&
+        !occurrence.resolution &&
+        !note?.trim()
+      ) {
+        setError(
+          "Descreva como o problema foi resolvido no campo de observação antes de concluir.",
+        );
+        return;
+      }
+      if (nextStatus === "RESOLVED" && !occurrence.resolution) {
+        await updateOccurrence(token, occurrence.id, {
+          resolution: note!.trim(),
+        });
+      }
+      await changeOccurrenceStatus(token, occurrence.id, nextStatus, note);
       setNotice(`Solicitação #${occurrence.id} atualizada.`);
       await loadData();
     } catch (statusError) {
@@ -209,7 +228,7 @@ export function ManagementWorkspace() {
     occurrence: OccurrenceRecord,
     assigneeId: string | null,
   ) {
-    if (!token) return;
+    if (!token || isFinalStatus(occurrence.status)) return;
     try {
       await assignOccurrence(
         token,
@@ -332,136 +351,150 @@ export function ManagementWorkspace() {
                   </Text>
                 </Group>
                 <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md">
-                  {occurrences.map((occurrence) => (
-                    <Card key={occurrence.id} withBorder radius="md">
-                      <Stack gap="sm">
-                        <Group justify="space-between" align="start">
-                          <div>
-                            <Text fw={700}>{occurrence.title}</Text>
-                            <Text size="xs" c="dimmed">
-                              Solicitação #{occurrence.id} · usuário{" "}
-                              {occurrence.requesterId}
-                            </Text>
-                          </div>
-                          <Badge
-                            color={
-                              occurrence.status === "RESOLVED"
-                                ? "teal"
-                                : occurrence.status === "CANCELLED"
-                                  ? "red"
-                                  : "blue"
-                            }
-                          >
-                            {statusLabels[occurrence.status]}
-                          </Badge>
-                        </Group>
-                        <Text size="sm" c="dimmed" lineClamp={3}>
-                          {occurrence.description}
-                        </Text>
-                        <Group gap="xs">
-                          <Badge variant="outline">
-                            {priorityLabels[occurrence.priority]}
-                          </Badge>
-                          {occurrence.locationText && (
-                            <Text size="xs" c="dimmed">
-                              {occurrence.locationText}
-                            </Text>
-                          )}
-                        </Group>
-                        <Select
-                          label="Responsável"
-                          placeholder="Delegar para um gestor"
-                          clearable
-                          data={managers.map((manager) => ({
-                            value: String(manager.id),
-                            label: manager.name,
-                          }))}
-                          value={
-                            occurrence.assigneeId
-                              ? String(occurrence.assigneeId)
-                              : null
-                          }
-                          onChange={(value) =>
-                            void handleAssignment(occurrence, value)
-                          }
-                        />
-                        <Group gap="xs">
-                          <Button
-                            size="xs"
-                            variant="subtle"
-                            leftSection={<IconEdit size={14} />}
-                            onClick={() => openOccurrenceEdit(occurrence)}
-                          >
-                            Editar
-                          </Button>
-                          <Button
-                            size="xs"
-                            variant="subtle"
-                            color="red"
-                            leftSection={<IconTrash size={14} />}
-                            onClick={() => void removeOccurrence(occurrence)}
-                          >
-                            Excluir
-                          </Button>
-                        </Group>
-                        {!(["RESOLVED", "CANCELLED"] as string[]).includes(
-                          occurrence.status,
-                        ) && (
-                          <>
-                            <Textarea
-                              size="xs"
-                              placeholder="Observação da decisão"
-                              value={noteByOccurrence[occurrence.id] ?? ""}
-                              onChange={(event) =>
-                                setNoteByOccurrence({
-                                  ...noteByOccurrence,
-                                  [occurrence.id]: event.currentTarget.value,
-                                })
+                  {occurrences.map((occurrence) => {
+                    const final = isFinalStatus(occurrence.status);
+                    const nextStatuses = getNextStatuses(occurrence.status);
+                    return (
+                      <Card key={occurrence.id} withBorder radius="md">
+                        <Stack gap="sm">
+                          <Group justify="space-between" align="start">
+                            <div>
+                              <Text fw={700}>{occurrence.title}</Text>
+                              <Text size="xs" c="dimmed">
+                                Solicitação #{occurrence.id} · usuário{" "}
+                                {occurrence.requesterId}
+                              </Text>
+                            </div>
+                            <Badge
+                              color={
+                                occurrence.status === "RESOLVED"
+                                  ? "teal"
+                                  : occurrence.status === "CANCELLED"
+                                    ? "red"
+                                    : "blue"
                               }
-                            />
-                            <Group gap="xs">
-                              {statusOptions
-                                .filter(
-                                  (option) =>
-                                    option.value !== occurrence.status,
-                                )
-                                .map((option) => (
+                            >
+                              {statusLabels[occurrence.status]}
+                            </Badge>
+                          </Group>
+                          <Text size="sm" c="dimmed" lineClamp={3}>
+                            {occurrence.description}
+                          </Text>
+                          <Group gap="xs">
+                            <Badge variant="outline">
+                              {priorityLabels[occurrence.priority]}
+                            </Badge>
+                            {occurrence.locationText && (
+                              <Text size="xs" c="dimmed">
+                                {occurrence.locationText}
+                              </Text>
+                            )}
+                          </Group>
+                          <Select
+                            label="Responsável"
+                            placeholder={
+                              final
+                                ? "Ocorrência em status final"
+                                : "Delegar para um gestor"
+                            }
+                            clearable
+                            disabled={final}
+                            data={managers.map((manager) => ({
+                              value: String(manager.id),
+                              label: manager.name,
+                            }))}
+                            value={
+                              occurrence.assigneeId
+                                ? String(occurrence.assigneeId)
+                                : null
+                            }
+                            onChange={(value) =>
+                              void handleAssignment(occurrence, value)
+                            }
+                          />
+                          <Group gap="xs">
+                            <Button
+                              component={Link}
+                              href={`/solicitacoes/${occurrence.id}`}
+                              size="xs"
+                              variant="subtle"
+                              color="dark"
+                              leftSection={<IconEye size={14} />}
+                            >
+                              Ver detalhes
+                            </Button>
+                            <Button
+                              size="xs"
+                              variant="subtle"
+                              leftSection={<IconEdit size={14} />}
+                              disabled={final}
+                              onClick={() => openOccurrenceEdit(occurrence)}
+                            >
+                              Editar
+                            </Button>
+                            <Button
+                              size="xs"
+                              variant="subtle"
+                              color="red"
+                              leftSection={<IconTrash size={14} />}
+                              onClick={() => void removeOccurrence(occurrence)}
+                            >
+                              Excluir
+                            </Button>
+                          </Group>
+                          {!final && nextStatuses.length > 0 && (
+                            <>
+                              <Textarea
+                                size="xs"
+                                placeholder={
+                                  nextStatuses.includes("RESOLVED")
+                                    ? "Observação da decisão (obrigatória para concluir, vira o texto de resolução)"
+                                    : "Observação da decisão"
+                                }
+                                value={noteByOccurrence[occurrence.id] ?? ""}
+                                onChange={(event) =>
+                                  setNoteByOccurrence({
+                                    ...noteByOccurrence,
+                                    [occurrence.id]: event.currentTarget.value,
+                                  })
+                                }
+                              />
+                              <Group gap="xs">
+                                {nextStatuses.map((statusValue) => (
                                   <Button
-                                    key={option.value}
+                                    key={statusValue}
                                     size="xs"
                                     variant={
-                                      option.value === "RESOLVED"
+                                      statusValue === "RESOLVED"
                                         ? "filled"
                                         : "light"
                                     }
                                     color={
-                                      option.value === "CANCELLED"
+                                      statusValue === "CANCELLED"
                                         ? "red"
-                                        : option.value === "RESOLVED"
+                                        : statusValue === "RESOLVED"
                                           ? "teal"
                                           : "blue"
                                     }
                                     leftSection={
-                                      option.value === "RESOLVED" ? (
+                                      statusValue === "RESOLVED" ? (
                                         <IconCheck size={14} />
                                       ) : undefined
                                     }
                                     onClick={() =>
-                                      approveOccurrence(
-                                        occurrence,
-                                        option.value,
-                                      )
+                                      approveOccurrence(occurrence, statusValue)
                                     }
                                   >
-                                    {option.label}
+                                    {statusLabelsByValue[statusValue]}
                                   </Button>
                                 ))}
-                            </Group>
-                          </>
-                        )}
-                      </Stack>
-                    </Card>
-                  ))}
+                              </Group>
+                            </>
+                          )}
+                        </Stack>
+                      </Card>
+                    );
+                  })}
                 </SimpleGrid>
               </Stack>
             </Tabs.Panel>

@@ -38,9 +38,27 @@ export type OccurrenceRecord = {
   latitude?: number | null;
   longitude?: number | null;
   resolution?: string | null;
+  resolvedAt?: string | null;
   createdAt?: string;
   updatedAt?: string;
 };
+
+export const STATUS_TRANSITIONS: Record<OccurrenceStatus, OccurrenceStatus[]> =
+  {
+    OPEN: ["IN_ANALYSIS", "CANCELLED"],
+    IN_ANALYSIS: ["IN_PROGRESS", "CANCELLED"],
+    IN_PROGRESS: ["RESOLVED", "CANCELLED"],
+    RESOLVED: [],
+    CANCELLED: [],
+  };
+
+export function isFinalStatus(status: OccurrenceStatus): boolean {
+  return STATUS_TRANSITIONS[status].length === 0;
+}
+
+export function getNextStatuses(status: OccurrenceStatus): OccurrenceStatus[] {
+  return STATUS_TRANSITIONS[status];
+}
 
 export type OccurrenceEventRecord = {
   id: number;
@@ -97,7 +115,11 @@ export type DashboardIndicators = {
   total: number;
   byStatus: Record<string, number>;
   byPriority: Record<string, number>;
-  byCategory: Array<{ categoryId: number; categoryName: string; total: number }>;
+  byCategory: Array<{
+    categoryId: number;
+    categoryName: string;
+    total: number;
+  }>;
   open: number;
   inProgress: number;
   resolved: number;

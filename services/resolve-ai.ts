@@ -111,6 +111,10 @@ export function getOccurrencesPaginated(
   );
 }
 
+export function getOccurrenceById(token: string | undefined, id: number) {
+  return apiRequest<OccurrenceRecord>(`/occurrences/${id}`, token);
+}
+
 export function getDashboardIndicators(token?: string) {
   return apiRequest<DashboardIndicators>("/occurrences/dashboard", token);
 }
@@ -133,18 +137,25 @@ export function getOccurrenceEvents(token: string | undefined, id: number) {
   );
 }
 
-export function getComments(token?: string) {
-  return apiRequest<CommentRecord[]>("/comments", token);
+export function getComments(token: string | undefined, occurrenceId?: number) {
+  return apiRequest<CommentRecord[]>(
+    `/comments${buildQueryString(occurrenceId ? { occurrenceId } : undefined)}`,
+    token,
+  );
 }
 
 export function createComment(
   token: string | undefined,
-  data: { occurrenceId: number; body: string },
+  data: { occurrenceId: number; body: string; isInternal?: boolean },
 ) {
   return apiRequest<CommentRecord>("/comments", token, {
     method: "POST",
     body: JSON.stringify(data),
   });
+}
+
+export function deleteComment(token: string | undefined, id: number) {
+  return apiRequest<void>(`/comments/${id}`, token, { method: "DELETE" });
 }
 
 export function getRatings(token?: string) {
