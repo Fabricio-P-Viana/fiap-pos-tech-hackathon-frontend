@@ -71,19 +71,17 @@ export type CreateOccurrenceFormValues = z.infer<
   typeof createOccurrenceSchema
 >;
 
+/**
+ * Edição da solicitação. Prioridade e resolução são opcionais porque só o
+ * gestor responsável vê esses campos — o solicitante edita apenas o conteúdo.
+ */
 export const editOccurrenceSchema = z.object({
   categoryId,
   title,
   description,
   locationText,
   locationReference,
-});
-
-export type EditOccurrenceFormValues = z.infer<typeof editOccurrenceSchema>;
-
-/** Campos que só o gestor responsável altera. */
-export const managerOccurrenceSchema = editOccurrenceSchema.extend({
-  priority,
+  priority: priority.optional(),
   resolution: z
     .string()
     .trim()
@@ -91,9 +89,7 @@ export const managerOccurrenceSchema = editOccurrenceSchema.extend({
     .optional(),
 });
 
-export type ManagerOccurrenceFormValues = z.infer<
-  typeof managerOccurrenceSchema
->;
+export type EditOccurrenceFormValues = z.infer<typeof editOccurrenceSchema>;
 
 export const priorityChangeSchema = z.object({
   priority,

@@ -92,18 +92,19 @@ export function FixedHeader() {
                 >
                   Inicio
                 </Button>
-
-                <Button
-                  component={Link}
-                  href="/solicitacoes"
-                  variant="subtle"
-                  color="gray"
-                  size="sm"
-                  leftSection={<IconClipboardText size={16} />}
-                  visibleFrom="md"
-                >
-                  Solicitações
-                </Button>
+                {!isManager && (
+                  <Button
+                    component={Link}
+                    href="/solicitacoes"
+                    variant="subtle"
+                    color="gray"
+                    size="sm"
+                    leftSection={<IconClipboardText size={16} />}
+                    visibleFrom="md"
+                  >
+                    Solicitações
+                  </Button>
+                )}
 
                 {isManager && (
                   <Button
