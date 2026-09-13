@@ -81,7 +81,7 @@ const LoginForm = () => {
         </Group>
 
         <Text size="sm" c="gray-filled-hover">
-          Acesse para ver os recados e avisos dos professores.
+          Entre para acompanhar suas solicitações e atualizações.
         </Text>
 
         <Divider />

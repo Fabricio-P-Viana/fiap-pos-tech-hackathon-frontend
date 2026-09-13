@@ -10,7 +10,12 @@ import {
   Text,
   UnstyledButton,
 } from "@mantine/core";
-import { IconLogout, IconHome } from "@tabler/icons-react";
+import {
+  IconClipboardText,
+  IconLogout,
+  IconHome,
+  IconSettings,
+} from "@tabler/icons-react";
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
 
@@ -87,6 +92,33 @@ export function FixedHeader() {
                 >
                   Inicio
                 </Button>
+                {!isManager && (
+                  <Button
+                    component={Link}
+                    href="/solicitacoes"
+                    variant="subtle"
+                    color="gray"
+                    size="sm"
+                    leftSection={<IconClipboardText size={16} />}
+                    visibleFrom="md"
+                  >
+                    Solicitações
+                  </Button>
+                )}
+
+                {isManager && (
+                  <Button
+                    component={Link}
+                    href="/gestao"
+                    variant="subtle"
+                    color="gray"
+                    size="sm"
+                    leftSection={<IconSettings size={16} />}
+                    visibleFrom="md"
+                  >
+                    Gestão
+                  </Button>
+                )}
 
                 <Menu
                   shadow="md"
@@ -143,6 +175,26 @@ export function FixedHeader() {
                     >
                       Inicio
                     </Menu.Item>
+
+                    <Menu.Item
+                      component={Link}
+                      href="/solicitacoes"
+                      leftSection={<IconClipboardText size={14} />}
+                      hiddenFrom="md"
+                    >
+                      Solicitações
+                    </Menu.Item>
+
+                    {isManager && (
+                      <Menu.Item
+                        component={Link}
+                        href="/gestao"
+                        leftSection={<IconSettings size={14} />}
+                        hiddenFrom="md"
+                      >
+                        Gestão
+                      </Menu.Item>
+                    )}
 
                     <Menu.Divider />
                     <Menu.Item

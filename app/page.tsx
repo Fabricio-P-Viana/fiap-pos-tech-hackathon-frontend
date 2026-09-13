@@ -1,25 +1,29 @@
-import { Button, Container, Paper, Stack, Text, Title } from "@mantine/core";
+"use client";
 
+import { LandingHero } from "@/components/home/landing-hero";
+import { ManagerHome } from "@/components/home/manager-home";
+import { RequesterHome } from "@/components/home/requester-home";
+import { LoadingState } from "@/components/shared/feedback";
+import { useCurrentUser } from "@/lib/use-current-user";
+
+/**
+ * A apresentação da plataforma só serve para quem não está logado; autenticado,
+ * a home vira o resumo da conta — do solicitante ou do gestor.
+ */
 export default function Home() {
+  const { isLoading, isAuthenticated, isManager } = useCurrentUser();
+
   return (
     <main id="conteudo-principal">
-      <Container size="lg" py={{ base: 40, sm: 72 }}>
-        <Paper p={{ base: "xl", sm: 48 }} withBorder>
-          <Stack gap="md" maw={680}>
-            <Text size="sm" tt="uppercase" fw={700} c="dimmed">
-              Resolve Aí
-            </Text>
-            <Title order={1}>Gestão de ocorrências</Title>
-            <Text size="lg" c="dimmed">
-              A base do portal está pronta. Em breve você poderá registrar,
-              acompanhar e resolver ocorrências por aqui.
-            </Text>
-            <Button component="a" href="/login" w="fit-content">
-              Acessar conta
-            </Button>
-          </Stack>
-        </Paper>
-      </Container>
+      {isLoading ? (
+        <LoadingState />
+      ) : !isAuthenticated ? (
+        <LandingHero />
+      ) : isManager ? (
+        <ManagerHome />
+      ) : (
+        <RequesterHome />
+      )}
     </main>
   );
 }

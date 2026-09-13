@@ -106,7 +106,7 @@ const RegisterForm = () => {
         </Group>
 
         <Text size="sm" c="gray-filled-hover">
-          Crie seu cadastro
+          Abra seu acesso como solicitante
         </Text>
 
         <Divider />
