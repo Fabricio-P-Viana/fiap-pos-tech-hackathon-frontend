@@ -300,7 +300,7 @@ export function RequestDetail({ id }: { id: number }) {
 
           <AttachmentsSection
             attachments={attachments}
-            canAttach={canInteract}
+            canAttach={isOwner && canInteract}
             isClosed={closed}
             onUpload={(file) =>
               run(

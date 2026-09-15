@@ -7,13 +7,12 @@ import {
   Container,
   Group,
   Pagination,
-  SimpleGrid,
   Stack,
 } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { OccurrenceCard } from "@/components/shared/occurrence-card";
+import { OccurrenceTable } from "@/components/shared/occurrence-table";
 import {
   EmptyState,
   ErrorAlert,
@@ -25,11 +24,9 @@ import { useOccurrenceList } from "@/lib/use-occurrence-list";
 import type { OccurrenceStatus } from "@/types/resolve-ai";
 import { RequestFilters } from "./request-filters";
 
-/** Lista as solicitações do solicitante (a API já escopa por usuário). */
 export function RequestList() {
   const searchParams = useSearchParams();
   const statusFromUrl = searchParams.get("status") as OccurrenceStatus | null;
-  // Gestor não abre solicitação: para ele a tela é só de acompanhamento.
   const { isManager } = useCurrentUser();
 
   const {
@@ -101,20 +98,12 @@ export function RequestList() {
             />
           ) : (
             <Stack gap="md">
-              <Group justify="space-between" align="center">
+              <Group>
                 <Badge variant="light">
                   {total} {total === 1 ? "solicitação" : "solicitações"}
                 </Badge>
               </Group>
-              <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md">
-                {occurrences.map((occurrence) => (
-                  <OccurrenceCard
-                    key={occurrence.id}
-                    occurrence={occurrence}
-                    showAssignee
-                  />
-                ))}
-              </SimpleGrid>
+              <OccurrenceTable occurrences={occurrences} showAssignee />
               {totalPages > 1 && (
                 <Center>
                   <Pagination
