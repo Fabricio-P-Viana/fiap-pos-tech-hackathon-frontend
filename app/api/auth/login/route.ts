@@ -5,7 +5,7 @@ import { loginSchema } from "@/schemas/auth";
 const AUTH_API_BASE_URL =
   process.env.AUTH_API_BASE_URL ??
   process.env.NEXT_PUBLIC_API_BASE_URL ??
-  "http://localhost:3001";
+  "https://hackathon-frontend-awhw.onrender.com";
 
 const AUTH_API_TIMEOUT_MS = 5000;
 
