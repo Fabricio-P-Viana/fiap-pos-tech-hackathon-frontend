@@ -1,6 +1,6 @@
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ??
-  "https://hackathon-frontend-awhw.onrender.com";
+  "https://hackathon-backend-sx6h.onrender.com/";
 
 export async function apiRequest<T>(
   path: string,
