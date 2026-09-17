@@ -18,10 +18,17 @@ import type {
 } from "@/types/resolve-ai";
 import { priorityLabels, statusLabels } from "@/types/resolve-ai";
 import { useCurrentUser } from "@/lib/use-current-user";
+import {
+  lastDashboardPeriod,
+  toDashboardQuery,
+  type DashboardPeriodInput,
+} from "@/lib/dashboard-period";
+import { formatDate } from "@/lib/occurrence";
 import { ErrorAlert, LoadingState } from "@/components/shared/feedback";
 import { PageHeader } from "@/components/shared/page-header";
 import { SummaryTiles } from "@/components/home/summary-tiles";
 import { BreakdownBars } from "./breakdown-bars";
+import { DashboardPeriodFilter } from "./dashboard-period-filter";
 
 const statusOrder: OccurrenceStatus[] = [
   "OPEN",
@@ -45,6 +52,9 @@ function pluralize(count: number, singular: string, plural: string) {
 
 export function DashboardPanel() {
   const { token } = useCurrentUser();
+  const [period, setPeriod] = useState<DashboardPeriodInput>(() =>
+    lastDashboardPeriod(),
+  );
   const [data, setData] = useState<DashboardIndicators | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -53,7 +63,10 @@ export function DashboardPanel() {
     if (!token) return;
     try {
       setLoading(true);
-      const indicators = await getDashboardIndicators(token);
+      const indicators = await getDashboardIndicators(
+        token,
+        toDashboardQuery(period),
+      );
       setData(indicators);
       setError(null);
     } catch (loadError) {
@@ -65,13 +78,13 @@ export function DashboardPanel() {
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, [token, period]);
 
   useEffect(() => {
     void load();
   }, [load]);
 
-  if (loading) return <LoadingState label="Carregando indicadores..." />;
+  if (loading && !data) return <LoadingState label="Carregando indicadores..." />;
 
   const ratings = data?.ratings;
   const ratingCount = ratings?.count ?? 0;
@@ -82,12 +95,24 @@ export function DashboardPanel() {
         eyebrow="Área administrativa"
         title="Dashboard"
         description="Volume da operação e a satisfação declarada pelos solicitantes."
+        action={
+          <DashboardPeriodFilter
+            value={period}
+            loading={loading}
+            onApply={setPeriod}
+          />
+        }
       />
 
       <ErrorAlert message={error} />
 
       {data && (
         <>
+          <Text size="sm" c="dimmed">
+            Solicitações abertas entre {formatDate(data.period.from)} e{" "}
+            {formatDate(data.period.to)}.
+          </Text>
+
           <SummaryTiles
             tiles={[
               { label: "Total", value: data.total },
@@ -124,7 +149,7 @@ export function DashboardPanel() {
                 <Text size="xs" c="dimmed">
                   {ratingCount
                     ? pluralize(ratingCount, "avaliação", "avaliações")
-                    : "Nenhuma avaliação ainda"}
+                    : "Nenhuma avaliação no período"}
                 </Text>
               </Stack>
             </Card>
@@ -164,7 +189,7 @@ export function DashboardPanel() {
                 <Title order={4}>Distribuição das notas</Title>
                 <BreakdownBars
                   total={ratingCount}
-                  emptyLabel="Nenhuma avaliação recebida ainda."
+                  emptyLabel="Nenhuma avaliação recebida no período."
                   items={
                     ratingCount === 0
                       ? []
@@ -184,7 +209,7 @@ export function DashboardPanel() {
                 <BreakdownBars
                   max={5}
                   formatValue={(value) => value.toFixed(1)}
-                  emptyLabel="Nenhuma categoria avaliada ainda."
+                  emptyLabel="Nenhuma categoria avaliada no período."
                   items={(ratings?.byCategory ?? []).map((category) => ({
                     key: String(category.categoryId),
                     label: category.categoryName,

@@ -117,8 +117,14 @@ export function getOccurrenceById(token: string | undefined, id: number) {
   return apiRequest<OccurrenceRecord>(`/occurrences/${id}`, token);
 }
 
-export function getDashboardIndicators(token?: string) {
-  return apiRequest<DashboardIndicators>("/occurrences/dashboard", token);
+export function getDashboardIndicators(
+  token?: string,
+  period?: { from: string; to: string },
+) {
+  return apiRequest<DashboardIndicators>(
+    `/occurrences/dashboard${buildQueryString(period)}`,
+    token,
+  );
 }
 
 /** O motivo é obrigatório: a solicitação permanece como histórico. */

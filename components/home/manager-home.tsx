@@ -112,8 +112,16 @@ export function ManagerHome() {
 
         <SummaryTiles
           tiles={[
-            { label: "Abertas", value: indicators?.open ?? 0 },
-            { label: "Em atendimento", value: indicators?.inProgress ?? 0 },
+            {
+              label: "Abertas",
+              value: indicators?.open ?? 0,
+              hint: "últimos 30 dias",
+            },
+            {
+              label: "Em atendimento",
+              value: indicators?.inProgress ?? 0,
+              hint: "últimos 30 dias",
+            },
             {
               label: "Sob minha responsabilidade",
               value: mine.length,
@@ -122,8 +130,8 @@ export function ManagerHome() {
               label: "Nota média",
               value: average == null ? "-" : average.toFixed(1),
               hint: indicators?.ratings?.count
-                ? `${indicators.ratings.count} ${indicators.ratings.count === 1 ? "avaliação" : "avaliações"}`
-                : "sem avaliações",
+                ? `${indicators.ratings.count} ${indicators.ratings.count === 1 ? "avaliação" : "avaliações"} em 30 dias`
+                : "sem avaliações em 30 dias",
             },
           ]}
         />
