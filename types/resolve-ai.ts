@@ -158,7 +158,13 @@ export type RatingIndicators = {
   }>;
 };
 
+export type DashboardPeriod = {
+  from: string;
+  to: string;
+};
+
 export type DashboardIndicators = {
+  period: DashboardPeriod;
   total: number;
   byStatus: Record<string, number>;
   byPriority: Record<string, number>;
